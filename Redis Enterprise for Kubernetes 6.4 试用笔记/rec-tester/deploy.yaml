@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rec-tester
+spec:
+  selector:
+    matchLabels:
+      app: rec-tester
+  template:
+    metadata:
+      labels:
+        app: rec-tester
+    spec:
+      containers:
+        - name: rec-tester
+          env:
+            - name: REDIS_ADDR
+              value: <rdb-addr>
+            - name: REDIS_PASSWD
+              value: <rdb-passwd>
+          image: easzlab.io.local:5000/rec-tester:v2
+          imagePullPolicy: Always
