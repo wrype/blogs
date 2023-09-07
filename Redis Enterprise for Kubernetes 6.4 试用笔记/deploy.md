@@ -193,6 +193,8 @@ sed 's/<rdb-addr>/redislabs-redb-demo:13362/g' ./rec-tester/deploy.yaml | sed "s
 
 为了 Operator 和 REC 能够访问其他命名空间的 REDB，对于每个**被管理**的命名空间，需要创建以下的 role.yaml、role_binding.yaml
 
+> role.yaml 从 https://github.com/RedisLabs/redis-enterprise-k8s-docs/tree/master/multi-namespace-redb 获取
+
 > 将 `<rec-namespace>` 替换为 REC 所在的命名空间，这里是`redislabs`
 
 > 将 `<service-account-name>` 替换为 REC 的名字，这里是`wrype-rec-demo`
