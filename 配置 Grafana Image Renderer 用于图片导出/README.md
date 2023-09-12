@@ -1,4 +1,4 @@
-博文地址：https://github.com/wrype/blogs/tree/main/%E9%85%8D%E7%BD%AE%20Grafana%20Image%20Renderer%20%E7%94%A8%E4%BA%8E%E5%9B%BE%E7%89%87%E5%AF%BC%E5%87%BA
+博文地址：[配置 Grafana Image Renderer 用于图片导出](https://github.com/wrype/blogs/tree/main/%E9%85%8D%E7%BD%AE%20Grafana%20Image%20Renderer%20%E7%94%A8%E4%BA%8E%E5%9B%BE%E7%89%87%E5%AF%BC%E5%87%BA)
 
 <!-- TOC -->
 
