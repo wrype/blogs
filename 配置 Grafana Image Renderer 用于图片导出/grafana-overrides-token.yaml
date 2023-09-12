@@ -1,0 +1,15 @@
+grafana:
+  # 定义面板展示的时区
+  defaultDashboardsTimezone: Asia/Shanghai
+  imageRenderer:
+    enabled: true
+    image:
+      pullPolicy: IfNotPresent
+      repository: grafana/grafana-image-renderer
+      tag: 3.7.2
+    networkPolicy:
+      limitIngress: false
+    env:
+      AUTH_TOKEN: ba5b3392
+  envRenderSecret:
+    GF_RENDERING_RENDERER_TOKEN: ba5b3392

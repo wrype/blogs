@@ -1,0 +1,11 @@
+grafana:
+  # 定义面板展示的时区
+  defaultDashboardsTimezone: Asia/Shanghai
+  imageRenderer:
+    enabled: true
+    image:
+      pullPolicy: IfNotPresent
+      repository: grafana/grafana-image-renderer
+      tag: 3.5.0
+    networkPolicy:
+      limitIngress: false
