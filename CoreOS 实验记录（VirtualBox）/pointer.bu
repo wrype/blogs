@@ -1,0 +1,6 @@
+variant: fcos
+version: 1.4.0
+ignition:
+  config:
+    replace:
+      source: http://192.168.126.1:5500/demo.ign
