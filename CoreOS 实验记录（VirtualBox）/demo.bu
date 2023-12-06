@@ -28,6 +28,10 @@ storage:
         inline: |
           [updates]
           enabled = false
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: core-tester
   links:
     - path: "/etc/localtime"
       target: "../usr/share/zoneinfo/Asia/Shanghai"

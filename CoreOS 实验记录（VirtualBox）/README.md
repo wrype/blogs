@@ -15,6 +15,7 @@
     - [配置正向代理，用于访问 fedora 仓库](#%E9%85%8D%E7%BD%AE%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E7%94%A8%E4%BA%8E%E8%AE%BF%E9%97%AE-fedora-%E4%BB%93%E5%BA%93)
     - [初始化系统时安装一些包](#%E5%88%9D%E5%A7%8B%E5%8C%96%E7%B3%BB%E7%BB%9F%E6%97%B6%E5%AE%89%E8%A3%85%E4%B8%80%E4%BA%9B%E5%8C%85)
     - [禁用系统自动更新](#%E7%A6%81%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0)
+    - [设置主机名](#%E8%AE%BE%E7%BD%AE%E4%B8%BB%E6%9C%BA%E5%90%8D)
 - [参考](#%E5%8F%82%E8%80%83)
 
 <!-- /TOC -->
@@ -88,6 +89,10 @@ storage:
         inline: |
           [updates]
           enabled = false
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: core-tester
   links:
     - path: "/etc/localtime"
       target: "../usr/share/zoneinfo/Asia/Shanghai"
@@ -267,6 +272,17 @@ storage:
         inline: |
           [updates]
           enabled = false
+```
+
+## 设置主机名
+
+```yaml
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: core-tester
 ```
 
 # 参考
