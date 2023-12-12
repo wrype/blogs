@@ -1,9 +1,11 @@
+博文地址：https://github.com/wrype/blogs/tree/main/CoreOS%20%E8%B8%A9%E5%9D%91%E7%AC%94%E8%AE%B0
+
 # 网络管理
 
 CoreOS 上没有 networkd 服务，需要通过 NetworkManager 来管理网络，相关的网络配置通过 nmcli 命令来操作。
 
 一般的配置过程是 `nmcli conn show` 查看现有的配置，`nmcli conn edit xxx` 修改配置，
-进入交互式界面后 `set xxx xxx` 修改配置项，`save` 后 `q` 退出。
+进入交互式界面后 `p` 打印出所有的配置项，`set xxx xxx` 修改配置项，`save` 后 `q` 退出。
 
 网卡的网络配置保存在 `/etc/NetworkManager/system-connections` 目录下。
 
