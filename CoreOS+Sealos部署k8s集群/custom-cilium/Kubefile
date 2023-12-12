@@ -1,0 +1,2 @@
+FROM labring/cilium:v1.13.4
+CMD [ "cp opt/cilium /usr/local/bin/", "cp opt/hubble /usr/local/bin/", "cilium install --chart-directory charts/cilium --helm-set kubeProxyReplacement=strict,k8sServiceHost=apiserver.cluster.local,k8sServicePort=6443" ]

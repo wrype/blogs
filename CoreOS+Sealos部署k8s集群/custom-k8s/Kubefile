@@ -1,0 +1,3 @@
+FROM kubernetes:v1.26.11
+COPY scripts/* /scripts/
+COPY etc/* /etc/
