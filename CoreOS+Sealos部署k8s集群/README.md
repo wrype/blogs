@@ -72,7 +72,7 @@ sealos save -o k8s1.26.tar -m --format docker-archive labring/kubernetes:v1.26.1
 sealos pull registry.cn-shanghai.aliyuncs.com/labring/kubernetes:v1.26.11
 ```
 
-sealos rootfs 镜像中的脚步会把一些二进制文件复制到 `/usr/bin/` 下面，
+sealos rootfs 镜像中的脚本会把一些二进制文件复制到 `/usr/bin/` 下面，
 然而 `/usr/bin/` 在 CoreOS 上是只读的，导致部署失败。
 
 这里修改一下相关的脚本和 service 文件，重新打包镜像。修改过的文件在 [custom-k8s](./custom-k8s/) 下面，主要的改动是把 `/usr/bin/` 替换为 `/usr/local/bin/`。
