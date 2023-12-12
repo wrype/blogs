@@ -1,3 +1,38 @@
+博文地址：https://github.com/wrype/blogs/tree/main/CoreOS%2BSealos%E9%83%A8%E7%BD%B2k8s%E9%9B%86%E7%BE%A4
+
+<!-- TOC -->
+
+- [前期准备](#前期准备)
+  - [CoreOS 机器准备](#coreos-机器准备)
+    - [**集群机器卸载 docker**](#集群机器卸载-docker)
+    - [**集群每台机器设置唯一的主机名**](#集群每台机器设置唯一的主机名)
+    - [运行 sealos 的机器上做集群机器免密](#运行-sealos-的机器上做集群机器免密)
+    - [上传`helm`、`sealos`二进制文件](#上传helmsealos二进制文件)
+  - [kubernetes、cilium 镜像修改](#kubernetescilium-镜像修改)
+    - [修改 sealos kubernetes 镜像](#修改-sealos-kubernetes-镜像)
+    - [修改 sealos cilium 镜像](#修改-sealos-cilium-镜像)
+  - [基础镜像列表](#基础镜像列表)
+- [k8s 集群部署](#k8s-集群部署)
+  - [Clusterfile 讲解](#clusterfile-讲解)
+  - [镜像顺序](#镜像顺序)
+  - [`/usr` 只读挂载处理](#usr-只读挂载处理)
+  - [设置 CIDR](#设置-cidr)
+  - [修改 chart values 文件](#修改-chart-values-文件)
+  - [查看集群状态](#查看集群状态)
+- [参考文档](#参考文档)
+- [sealos 常用命令](#sealos-常用命令)
+  - [sealos images](#sealos-images)
+  - [sealos build --debug -t \<tag\> \<Kubefile\>](#sealos-build---debug--t-tag-kubefile)
+  - [sealos pull \<img\>](#sealos-pull-img)
+  - [sealos save -o \<tar\> -m --format docker-archive \<imgs\>](#sealos-save--o-tar--m---format-docker-archive-imgs)
+  - [sealos load -i \<tar\>](#sealos-load--i-tar)
+  - [sealos rmi \<imgs\>](#sealos-rmi-imgs)
+  - [sealos add](#sealos-add)
+  - [sealos delete](#sealos-delete)
+  - [sealos reset](#sealos-reset)
+
+<!-- /TOC -->
+
 # 前期准备
 
 ## CoreOS 机器准备
@@ -62,7 +97,7 @@ sealos cilium 镜像的 Dockerfile CMD 里面把二进制文件复制到 `/usr/b
 sealos build --debug -t labring/cilium:v1.13.4-coreos custom-cilium/
 ```
 
-## 基础镜像列表：
+## 基础镜像列表
 
 - labring/kubernetes:v1.26.11
 - labring/cilium:v1.13.4
