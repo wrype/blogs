@@ -5,6 +5,7 @@
 - [前期准备](#前期准备)
   - [CoreOS 机器准备](#coreos-机器准备)
     - [**集群机器卸载 docker**](#集群机器卸载-docker)
+    - [（可选）卸载云镜像自带的 containerd、runc](#可选卸载云镜像自带的-containerdrunc)
     - [**集群每台机器设置唯一的主机名**](#集群每台机器设置唯一的主机名)
     - [运行 sealos 的机器上做集群机器免密](#运行-sealos-的机器上做集群机器免密)
     - [上传`helm`、`sealos`二进制文件](#上传helmsealos二进制文件)
@@ -40,6 +41,10 @@
 ### **集群机器卸载 docker**
 
 CoreOS 的云镜像自带 docker，需要把他卸载掉，运行命令：`rpm-ostree override remove moby-engine`，重启机器
+
+### （可选）卸载云镜像自带的 containerd、runc
+
+运行命令：`rpm-ostree override remove containerd runc`，重启机器
 
 ### **集群每台机器设置唯一的主机名**
 
