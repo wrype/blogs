@@ -1,3 +1,5 @@
+博文地址：https://github.com/wrype/blogs/tree/main/CoreOS%20%E5%AE%9E%E9%AA%8C%E8%AE%B0%E5%BD%95%EF%BC%88VirtualBox%EF%BC%89
+
 <!-- TOC -->
 
 - [测试场景：CoreOS 初始化时安装软件](#%E6%B5%8B%E8%AF%95%E5%9C%BA%E6%99%AFcoreos-%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6)
@@ -16,6 +18,8 @@
     - [初始化系统时安装一些包](#%E5%88%9D%E5%A7%8B%E5%8C%96%E7%B3%BB%E7%BB%9F%E6%97%B6%E5%AE%89%E8%A3%85%E4%B8%80%E4%BA%9B%E5%8C%85)
     - [禁用系统自动更新](#%E7%A6%81%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0)
     - [设置主机名](#%E8%AE%BE%E7%BD%AE%E4%B8%BB%E6%9C%BA%E5%90%8D)
+- [镜像内嵌 ign 文件](#%E9%95%9C%E5%83%8F%E5%86%85%E5%B5%8C-ign-%E6%96%87%E4%BB%B6)
+    - [原理分析](#%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90)
 - [参考](#%E5%8F%82%E8%80%83)
 
 <!-- /TOC -->
@@ -284,6 +288,46 @@ storage:
       contents:
         inline: core-tester
 ```
+
+# 镜像内嵌 ign 文件
+
+> 参考 https://www.matthiaspreu.com/posts/fedora-coreos-embed-ignition-config/
+
+```bash
+# 工具安装
+sudo apt-get install qemu-utils libguestfs-tools virt-manager
+# 查找 boot 分区，fedora-coreos-embed-ign.qcow2 是复制的云镜像
+sudo virt-filesystems -a fedora-coreos-embed-ign.qcow2 -l | grep boot
+```
+
+![](imgs/Snipaste_2023-12-13_14-29-11.png)
+
+准备 1 个 ign 文件并命名为 `config.ign`
+
+```bash
+# 进入交互式界面
+sudo guestfish -a fedora-coreos-embed-ign.qcow2
+```
+
+![](imgs/Snipaste_2023-12-13_14-40-53.png)
+
+使用 `sudo virt-manager` 创建虚机测试一下
+
+![](imgs/Snipaste_2023-12-13_14-51-39.png)
+
+![](imgs/Snipaste_2023-12-13_14-58-39.png)
+
+## 原理分析
+
+CoreOS上查看脚本 `cat /usr/lib/dracut/modules.d/35coreos-ignition/coreos-ignition-setup-user.sh`，
+会把 `/boot/ignition/config.ign` 复制到 `/usr/lib/ignition/user.ign`
+
+> 源码 https://github.com/coreos/fedora-coreos-config/blob/testing-devel/overlay.d/05core/usr/lib/dracut/modules.d/35coreos-ignition/coreos-ignition-setup-user.sh
+
+![](imgs/Snipaste_2023-12-13_16-00-25.png)
+
+> journalctl --identifier=ignition --all
+> ![](imgs/Snipaste_2023-12-13_16-02-44.png)
 
 # 参考
 
