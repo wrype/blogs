@@ -66,14 +66,20 @@ systemctl restart NetworkManager
 # 安装本地 rpm 包
 
 ```bash
-rpm-ostree install -C xxx.rpm
+rpm-ostree install -C --idempotent --apply-live *.rpm
 ```
 
 ![](imgs/Snipaste_2023-12-11_22-55-23.png)
 
-安装后重启即可，rpm 包可以在 CoreOS 上安装 `rpm-ostree install --apply-live yum-utils` 后使用 `yumdownloader --resolve xxx` 下载。
+rpm 包可以在 CoreOS 上安装 `rpm-ostree install --apply-live yum-utils` 后使用 `yumdownloader --resolve xxx` 下载。
 
 已安装的包可以通过 `rpm-ostree override remove xxx` 卸载。
+
+## selinux disable 后装不了包
+
+![](imgs/Snipaste_2023-12-18_15-41-54.png)
+
+这时候需要将 `/etc/selinux/config` 修改为 `SELINUX=permissive`，重启后就可以安装软件了。
 
 # 硬盘扩容，growfs
 
