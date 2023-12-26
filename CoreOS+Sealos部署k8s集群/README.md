@@ -4,6 +4,7 @@
 
 - [前期准备](#前期准备)
   - [CoreOS 机器准备](#coreos-机器准备)
+    - [将 selinux 设置为 permissive 模式](#将-selinux-设置为-permissive-模式)
     - [**集群机器卸载 docker**](#集群机器卸载-docker)
     - [（可选）卸载云镜像自带的 containerd、runc](#可选卸载云镜像自带的-containerdrunc)
     - [**集群每台机器设置唯一的主机名**](#集群每台机器设置唯一的主机名)
@@ -13,11 +14,15 @@
     - [修改 sealos kubernetes 镜像](#修改-sealos-kubernetes-镜像)
     - [修改 sealos cilium 镜像](#修改-sealos-cilium-镜像)
   - [基础镜像列表](#基础镜像列表)
+- [生成 Clusterfile](#生成-clusterfile)
+  - [生成 Clusterfile 模板](#生成-clusterfile-模板)
+  - [根据模板编写 Clusterfile](#根据模板编写-clusterfile)
 - [k8s 集群部署](#k8s-集群部署)
-  - [Clusterfile 讲解](#clusterfile-讲解)
+- [Clusterfile 讲解](#clusterfile-讲解)
   - [镜像顺序](#镜像顺序)
-  - [`/usr` 只读挂载处理](#usr-只读挂载处理)
+  - [设置 TLS 证书主题别名](#设置-tls-证书主题别名)
   - [设置 CIDR](#设置-cidr)
+  - [`/usr` 只读挂载处理](#usr-只读挂载处理)
   - [修改 chart values 文件](#修改-chart-values-文件)
   - [查看集群状态](#查看集群状态)
 - [参考文档](#参考文档)
@@ -37,6 +42,10 @@
 # 前期准备
 
 ## CoreOS 机器准备
+
+### 将 selinux 设置为 permissive 模式
+
+selinux disable 后将装不了 rpm 包
 
 ### **集群机器卸载 docker**
 
@@ -111,16 +120,20 @@ sealos build --debug -t labring/cilium:v1.13.4-coreos custom-cilium/
 
 这里我们可以下载阿里云上的 sealos 镜像，加上仓库地址：`registry.cn-shanghai.aliyuncs.com`
 
-# k8s 集群部署
+# 生成 Clusterfile
+
+## 生成 [Clusterfile 模板](./Clusterfile-template)
+
+> 参考 https://sealos.io/zh-Hans/docs/self-hosting/lifecycle-management/advanced-guide/dual-stack-cluster
+> 会连上机器做一些检查
 
 ```bash
-# 导入镜像
-sealos load -i k8s1.26.tar
-# 部署集群，相关的临时文件在 ~/.sealos 下面
-sealos apply -f Clusterfile
+sealos gen labring/kubernetes:v1.26.11-coreos labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18 --masters 192.168.3.10,192.168.3.11,192.168.3.12 --nodes 192.168.3.13,192.168.3.14 -o Clusterfile-template
 ```
 
-## [Clusterfile](./Clusterfile) 讲解
+## 根据模板编写 [Clusterfile](./Clusterfile)
+
+修改成支持 IPv6 双栈
 
 ```yaml
 apiVersion: apps.sealos.io/v1beta1
@@ -130,15 +143,15 @@ metadata:
 spec:
   hosts:
     - ips:
-        - 192.168.56.104
-        - 192.168.56.118
-        - 192.168.56.119
+        - 192.168.3.10
+        - 192.168.3.11
+        - 192.168.3.12
       roles:
         - master
         - amd64
     - ips:
-        - 192.168.56.120
-        - 192.168.56.121
+        - 192.168.3.13
+        - 192.168.3.14
       roles:
         - node
         - amd64
@@ -150,30 +163,58 @@ spec:
 status: {}
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+APIServer:
+  CertSANs:
+    - 127.0.0.1
+    - apiserver.cluster.local
+    - 10.103.97.2
+    - 192.168.3.10
+    - 192.168.3.11
+    - 192.168.3.12
+    # 添加3台master的IPv6地址
+    - fd62:b9ce:de98:2000:3439:dd60:45a3:41d9
+    - fe80::40da:3c79:2aaf:82ae
+    - fd62:b9ce:de98:2000:9d7:6759:10a5:6494
+    - fe80::803f:dece:5fac:465e
+    - fd62:b9ce:de98:2000:d9d3:cd50:4771:9321
+    - fe80::206f:aaea:5bfa:1097
+Networking:
+  # subnet网段必须比node网段大
+  PodSubnet: 100.20.0.0/16,fc00:2222::/112
+  ServiceSubnet: 100.68.0.0/16,fd00:1111::/112
+ControllerManager:
+  ExtraArgs:
+    flex-volume-plugin-dir: "/opt/libexec/kubernetes/kubelet-plugins/volume/exec/"
+    node-cidr-mask-size-ipv6: 120 #Default to 64
+    node-cidr-mask-size-ipv4: 24 #Default to 24
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+clusterCIDR: 100.20.0.0/16,fc00:2222::/112 #add pod IPv6 subnet
+---
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 nodeRegistration:
   kubeletExtraArgs:
     volume-plugin-dir: "/opt/libexec/kubernetes/kubelet-plugins/volume/exec/"
 ---
-apiVersion: kubeadm.k8s.io/v1beta3
-kind: ClusterConfiguration
-controllerManager:
-  extraArgs:
-    flex-volume-plugin-dir: "/opt/libexec/kubernetes/kubelet-plugins/volume/exec/"
-networking:
-  podSubnet: 10.244.0.0/16,2001:db8:42:0::/56
-  serviceSubnet: 10.96.0.0/16,2001:db8:42:1::/112
-# ---
-# apiVersion: apps.sealos.io/v1beta1
-# kind: Config
-# metadata:
-#   name: cilium
-# spec:
-#   path: charts/cilium/values.yaml
-#   strategy: merge
-#   data: |
-#     ipv6:
-#       enabled: true
+apiVersion: apps.sealos.io/v1beta1
+kind: Config
+metadata:
+  name: cilium
+spec:
+  path: charts/cilium/values.yaml
+  strategy: merge
+  data: |
+    ipv6:
+      enabled: true
+    ipam:
+      operator:
+        clusterPoolIPv4PodCIDR: "100.20.0.0/16"
+        clusterPoolIPv4MaskSize: 24
+        clusterPoolIPv6PodCIDR: "fc00:2222::/112"
+        clusterPoolIPv6MaskSize: 120
 ---
 apiVersion: apps.sealos.io/v1beta1
 kind: Config
@@ -190,6 +231,17 @@ spec:
       name: managed-nfs-storage
 ```
 
+# k8s 集群部署
+
+```bash
+# 导入镜像
+sealos load -i k8s1.26.tar
+# 部署集群，相关的临时文件在 ~/.sealos 下面
+sealos apply -f Clusterfile
+```
+
+# [Clusterfile](./Clusterfile) 讲解
+
 ## 镜像顺序
 
 ```yaml
@@ -201,6 +253,34 @@ image:
 ```
 
 sealos 会按顺序调用镜像中的部署脚本，所以头 2 个镜像的顺序不能调换（先部署 k8s 集群，然后部署网络插件）。
+
+## 设置 TLS 证书主题别名
+
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+APIServer:
+  CertSANs:
+......
+```
+
+## 设置 CIDR
+
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+Networking:
+  # subnet网段必须比node网段大
+  PodSubnet: 100.20.0.0/16,fc00:2222::/112
+  ServiceSubnet: 100.68.0.0/16,fd00:1111::/112
+ControllerManager:
+  ExtraArgs:
+    # 设置主机地址段掩码长度
+    node-cidr-mask-size-ipv6: 120 #Default to 64
+    node-cidr-mask-size-ipv4: 24 #Default to 24
+```
+
+参考 https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/dual-stack-support/#create-a-dual-stack-cluster
 
 ## `/usr` 只读挂载处理
 
@@ -215,18 +295,6 @@ sealos 会按顺序调用镜像中的部署脚本，所以头 2 个镜像的顺�
 kubeadm 默认参数是在 `/usr/libexec` 下面，`/usr/libexec` 在 CoreOS 上是只读的，这里改为 `/opt/libexec`。
 
 > 参考 https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/troubleshooting-kubeadm/#usr-mounted-read-only
-
-## 设置 CIDR
-
-```yaml
-......
-networking:
-  podSubnet: 10.244.0.0/16,2001:db8:42:0::/56
-  serviceSubnet: 10.96.0.0/16,2001:db8:42:1::/112
-......
-```
-
-参考 https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/dual-stack-support/#create-a-dual-stack-cluster
 
 ## 修改 chart values 文件
 
