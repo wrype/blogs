@@ -4,25 +4,27 @@ metadata:
   creationTimestamp: null
   name: default
 spec:
+  env:
+    - BIN_DIR=/usr/local/bin
   hosts:
-  - ips:
-    - 192.168.3.10:22
-    - 192.168.3.11:22
-    - 192.168.3.12:22
-    roles:
-    - master
-    - amd64
-  - ips:
-    - 192.168.3.13:22
-    - 192.168.3.14:22
-    roles:
-    - node
-    - amd64
+    - ips:
+        - 192.168.3.10:22
+        - 192.168.3.11:22
+        - 192.168.3.12:22
+      roles:
+        - master
+        - amd64
+    - ips:
+        - 192.168.3.13:22
+        - 192.168.3.14:22
+      roles:
+        - node
+        - amd64
   image:
-  - labring/kubernetes:v1.26.11-coreos
-  - labring/cilium:v1.13.4-coreos
-  - labring/metrics-server:v0.6.4
-  - labring/nfs-subdir-external-provisioner:v4.0.18
+    - labring/kubernetes:v1.26.9
+    - labring/cilium:v1.13.4-coreos
+    - labring/metrics-server:v0.6.4
+    - labring/nfs-subdir-external-provisioner:v4.0.18
   ssh: {}
 status: {}
 
@@ -46,12 +48,12 @@ kind: InitConfiguration
 ---
 APIServer:
   CertSANs:
-  - 127.0.0.1
-  - apiserver.cluster.local
-  - 10.103.97.2
-  - 192.168.3.10
-  - 192.168.3.11
-  - 192.168.3.12
+    - 127.0.0.1
+    - apiserver.cluster.local
+    - 10.103.97.2
+    - 192.168.3.10
+    - 192.168.3.11
+    - 192.168.3.12
   ExtraArgs:
     audit-log-format: json
     audit-log-maxage: "7"
@@ -62,36 +64,36 @@ APIServer:
     enable-aggregator-routing: "true"
     feature-gates: ""
   ExtraVolumes:
-  - HostPath: /etc/kubernetes
-    MountPath: /etc/kubernetes
-    Name: audit
-    PathType: DirectoryOrCreate
-    ReadOnly: false
-  - HostPath: /var/log/kubernetes
-    MountPath: /var/log/kubernetes
-    Name: audit-log
-    PathType: DirectoryOrCreate
-    ReadOnly: false
-  - HostPath: /etc/localtime
-    MountPath: /etc/localtime
-    Name: localtime
-    PathType: File
-    ReadOnly: true
-  - HostPath: /etc/kubernetes
-    MountPath: /etc/kubernetes
-    Name: audit
-    PathType: DirectoryOrCreate
-    ReadOnly: false
-  - HostPath: /var/log/kubernetes
-    MountPath: /var/log/kubernetes
-    Name: audit-log
-    PathType: DirectoryOrCreate
-    ReadOnly: false
-  - HostPath: /etc/localtime
-    MountPath: /etc/localtime
-    Name: localtime
-    PathType: File
-    ReadOnly: true
+    - HostPath: /etc/kubernetes
+      MountPath: /etc/kubernetes
+      Name: audit
+      PathType: DirectoryOrCreate
+      ReadOnly: false
+    - HostPath: /var/log/kubernetes
+      MountPath: /var/log/kubernetes
+      Name: audit-log
+      PathType: DirectoryOrCreate
+      ReadOnly: false
+    - HostPath: /etc/localtime
+      MountPath: /etc/localtime
+      Name: localtime
+      PathType: File
+      ReadOnly: true
+    - HostPath: /etc/kubernetes
+      MountPath: /etc/kubernetes
+      Name: audit
+      PathType: DirectoryOrCreate
+      ReadOnly: false
+    - HostPath: /var/log/kubernetes
+      MountPath: /var/log/kubernetes
+      Name: audit-log
+      PathType: DirectoryOrCreate
+      ReadOnly: false
+    - HostPath: /etc/localtime
+      MountPath: /etc/localtime
+      Name: localtime
+      PathType: File
+      ReadOnly: true
   TimeoutForControlPlane: null
 CIImageRepository: ""
 CIKubernetesVersion: ""
@@ -105,16 +107,16 @@ ControllerManager:
     cluster-signing-duration: 876000h
     feature-gates: ""
   ExtraVolumes:
-  - HostPath: /etc/localtime
-    MountPath: /etc/localtime
-    Name: localtime
-    PathType: File
-    ReadOnly: true
-  - HostPath: /etc/localtime
-    MountPath: /etc/localtime
-    Name: localtime
-    PathType: File
-    ReadOnly: true
+    - HostPath: /etc/localtime
+      MountPath: /etc/localtime
+      Name: localtime
+      PathType: File
+      ReadOnly: true
+    - HostPath: /etc/localtime
+      MountPath: /etc/localtime
+      Name: localtime
+      PathType: File
+      ReadOnly: true
 DNS:
   ImageRepository: ""
   ImageTag: ""
@@ -131,7 +133,7 @@ Etcd:
     ServerCertSANs: null
 FeatureGates: null
 ImageRepository: ""
-KubernetesVersion: v1.26.11
+KubernetesVersion: v1.26.0
 Networking:
   DNSDomain: ""
   PodSubnet: 100.64.0.0/10
@@ -141,16 +143,16 @@ Scheduler:
     bind-address: 0.0.0.0
     feature-gates: ""
   ExtraVolumes:
-  - HostPath: /etc/localtime
-    MountPath: /etc/localtime
-    Name: localtime
-    PathType: File
-    ReadOnly: true
-  - HostPath: /etc/localtime
-    MountPath: /etc/localtime
-    Name: localtime
-    PathType: File
-    ReadOnly: true
+    - HostPath: /etc/localtime
+      MountPath: /etc/localtime
+      Name: localtime
+      PathType: File
+      ReadOnly: true
+    - HostPath: /etc/localtime
+      MountPath: /etc/localtime
+      Name: localtime
+      PathType: File
+      ReadOnly: true
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 
@@ -208,7 +210,7 @@ iptables:
   syncPeriod: 30s
 ipvs:
   excludeCIDRs:
-  - 10.103.97.2/32
+    - 10.103.97.2/32
   minSyncPeriod: 0s
   scheduler: ""
   strictARP: false
@@ -264,8 +266,8 @@ enableProfilingHandler: true
 enableServer: true
 enableSystemLogHandler: true
 enforceNodeAllocatable:
-- pods
-- pods
+  - pods
+  - pods
 eventBurst: 10
 eventRecordQPS: 5
 evictionHard:
@@ -325,4 +327,3 @@ topologyManagerPolicy: none
 topologyManagerScope: container
 volumePluginDir: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/
 volumeStatsAggPeriod: 1m0s
-

@@ -10,8 +10,7 @@
     - [**集群每台机器设置唯一的主机名**](#集群每台机器设置唯一的主机名)
     - [运行 sealos 的机器上做集群机器免密](#运行-sealos-的机器上做集群机器免密)
     - [上传`helm`、`sealos`二进制文件](#上传helmsealos二进制文件)
-  - [kubernetes、cilium 镜像修改](#kubernetescilium-镜像修改)
-    - [修改 sealos kubernetes 镜像](#修改-sealos-kubernetes-镜像)
+  - [镜像修改](#镜像修改)
     - [修改 sealos cilium 镜像](#修改-sealos-cilium-镜像)
   - [基础镜像列表](#基础镜像列表)
 - [生成 Clusterfile](#生成-clusterfile)
@@ -72,29 +71,12 @@ source <(helm completion bash)
 EOF
 ```
 
-## kubernetes、cilium 镜像修改
+## 镜像修改
 
-针对 CoreOS 需要对 kubernetes、cilium 镜像做一些修改，修改后把所有镜像都导出到 tar 包：
-
-```bash
-sealos save -o k8s1.26.tar -m --format docker-archive labring/kubernetes:v1.26.11-coreos labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18
-```
-
-### 修改 sealos kubernetes 镜像
+针对 CoreOS 需要对 cilium 镜像做一些修改，修改后把所有镜像都导出到 tar 包：
 
 ```bash
-sealos pull registry.cn-shanghai.aliyuncs.com/labring/kubernetes:v1.26.11
-```
-
-sealos rootfs 镜像中的脚本会把一些二进制文件复制到 `/usr/bin/` 下面，
-然而 `/usr/bin/` 在 CoreOS 上是只读的，导致部署失败。
-
-这里修改一下相关的脚本和 service 文件，重新打包镜像。修改过的文件在 [custom-k8s](./custom-k8s/) 下面，主要的改动是把 `/usr/bin/` 替换为 `/usr/local/bin/`。
-
-> rootfs 源码仓库 https://github.com/labring-actions/runtime/tree/main/k8s
-
-```bash
-sealos build --debug -t labring/kubernetes:v1.26.11-coreos custom-k8s/
+sealos save -o k8s1.26.tar -m --format docker-archive labring/kubernetes:v1.26.9 labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18
 ```
 
 ### 修改 sealos cilium 镜像
@@ -113,7 +95,7 @@ sealos build --debug -t labring/cilium:v1.13.4-coreos custom-cilium/
 
 ## 基础镜像列表
 
-- labring/kubernetes:v1.26.11
+- labring/kubernetes:v1.26.9
 - labring/cilium:v1.13.4
 - labring/metrics-server:v0.6.4
 - labring/nfs-subdir-external-provisioner:v4.0.18
@@ -127,8 +109,10 @@ sealos build --debug -t labring/cilium:v1.13.4-coreos custom-cilium/
 > 参考 https://sealos.io/zh-Hans/docs/self-hosting/lifecycle-management/advanced-guide/dual-stack-cluster
 > 会连上机器做一些检查
 
+默认的二进制文件路径 `/usr/bin/` 在 CoreOS 上是只读的，指定 `-e BIN_DIR=/usr/local/bin` 参数进行修改。
+
 ```bash
-sealos gen labring/kubernetes:v1.26.11-coreos labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18 --masters 192.168.3.10,192.168.3.11,192.168.3.12 --nodes 192.168.3.13,192.168.3.14 -o Clusterfile-template
+sealos gen labring/kubernetes:v1.26.9 labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18 --masters 192.168.3.10,192.168.3.11,192.168.3.12 --nodes 192.168.3.13,192.168.3.14 -e BIN_DIR=/usr/local/bin -o Clusterfile-template
 ```
 
 ## 根据模板编写 [Clusterfile](./Clusterfile)
@@ -141,6 +125,8 @@ kind: Cluster
 metadata:
   name: default
 spec:
+  env:
+    - BIN_DIR=/usr/local/bin
   hosts:
     - ips:
         - 192.168.3.10
@@ -156,7 +142,7 @@ spec:
         - node
         - amd64
   image:
-    - labring/kubernetes:v1.26.11-coreos
+    - labring/kubernetes:v1.26.9
     - labring/cilium:v1.13.4-coreos
     - labring/metrics-server:v0.6.4
     - labring/nfs-subdir-external-provisioner:v4.0.18
@@ -172,13 +158,13 @@ APIServer:
     - 192.168.3.10
     - 192.168.3.11
     - 192.168.3.12
-    # 添加3台master的IPv6地址
-    - fd62:b9ce:de98:2000:3439:dd60:45a3:41d9
-    - fe80::40da:3c79:2aaf:82ae
-    - fd62:b9ce:de98:2000:9d7:6759:10a5:6494
-    - fe80::803f:dece:5fac:465e
-    - fd62:b9ce:de98:2000:d9d3:cd50:4771:9321
-    - fe80::206f:aaea:5bfa:1097
+    # 添加3台master的Ipv6地址
+    - fd62:b9ce:de98:2000:bb8d:d642:c349:3370
+    - fe80::f8c1:e25d:43e5:99b5
+    - fd62:b9ce:de98:2000:f642:2f95:5fdd:1506
+    - fe80::3c73:9933:4a64:ea91
+    - fd62:b9ce:de98:2000:abf3:44ef:62b4:1b35
+    - fe80::2817:ccf7:bbc1:b5ff
 Networking:
   # subnet网段必须比node网段大
   PodSubnet: 100.20.0.0/16,fc00:2222::/112
@@ -225,7 +211,7 @@ spec:
   strategy: merge
   data: |
     nfs:
-      server: 192.168.56.117
+      server: 192.168.3.15
       path: /data/nfs
     storageClass:
       name: managed-nfs-storage
@@ -246,7 +232,7 @@ sealos apply -f Clusterfile
 
 ```yaml
 image:
-  - labring/kubernetes:v1.26.11-coreos
+  - labring/kubernetes:v1.26.9
   - labring/cilium:v1.13.4-coreos
   - labring/metrics-server:v0.6.4
   - labring/nfs-subdir-external-provisioner:v4.0.18
@@ -312,7 +298,7 @@ spec:
   strategy: merge
   data: |
     nfs:
-      server: 192.168.56.117
+      server: 192.168.3.15
       path: /data/nfs
     storageClass:
       name: managed-nfs-storage
