@@ -21,7 +21,7 @@ spec:
         - node
         - amd64
   image:
-    - labring/kubernetes:v1.26.9
+    - labring/kubernetes:v1.26.12
     - labring/cilium:v1.13.4-coreos
     - labring/metrics-server:v0.6.4
     - labring/nfs-subdir-external-provisioner:v4.0.18

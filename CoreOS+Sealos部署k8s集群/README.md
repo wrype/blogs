@@ -76,7 +76,7 @@ EOF
 针对 CoreOS 需要对 cilium 镜像做一些修改，修改后把所有镜像都导出到 tar 包：
 
 ```bash
-sealos save -o k8s1.26.tar -m --format docker-archive labring/kubernetes:v1.26.9 labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18
+sealos save -o k8s1.26.tar -m --format docker-archive labring/kubernetes:v1.26.12 labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18
 ```
 
 ### 修改 sealos cilium 镜像
@@ -95,7 +95,7 @@ sealos build --debug -t labring/cilium:v1.13.4-coreos custom-cilium/
 
 ## 基础镜像列表
 
-- labring/kubernetes:v1.26.9
+- labring/kubernetes:v1.26.12
 - labring/cilium:v1.13.4
 - labring/metrics-server:v0.6.4
 - labring/nfs-subdir-external-provisioner:v4.0.18
@@ -112,7 +112,7 @@ sealos build --debug -t labring/cilium:v1.13.4-coreos custom-cilium/
 默认的二进制文件路径 `/usr/bin/` 在 CoreOS 上是只读的，指定 `-e BIN_DIR=/usr/local/bin` 参数进行修改。
 
 ```bash
-sealos gen labring/kubernetes:v1.26.9 labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18 --masters 192.168.3.10,192.168.3.11,192.168.3.12 --nodes 192.168.3.13,192.168.3.14 -e BIN_DIR=/usr/local/bin -o Clusterfile-template
+sealos gen labring/kubernetes:v1.26.12 labring/cilium:v1.13.4-coreos labring/metrics-server:v0.6.4 labring/nfs-subdir-external-provisioner:v4.0.18 --masters 192.168.3.10,192.168.3.11,192.168.3.12 --nodes 192.168.3.13,192.168.3.14 -e BIN_DIR=/usr/local/bin -o Clusterfile-template
 ```
 
 ## 根据模板编写 [Clusterfile](./Clusterfile)
@@ -142,7 +142,7 @@ spec:
         - node
         - amd64
   image:
-    - labring/kubernetes:v1.26.9
+    - labring/kubernetes:v1.26.12
     - labring/cilium:v1.13.4-coreos
     - labring/metrics-server:v0.6.4
     - labring/nfs-subdir-external-provisioner:v4.0.18
@@ -232,7 +232,7 @@ sealos apply -f Clusterfile
 
 ```yaml
 image:
-  - labring/kubernetes:v1.26.9
+  - labring/kubernetes:v1.26.12
   - labring/cilium:v1.13.4-coreos
   - labring/metrics-server:v0.6.4
   - labring/nfs-subdir-external-provisioner:v4.0.18
