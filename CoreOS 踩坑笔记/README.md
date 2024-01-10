@@ -66,12 +66,12 @@ systemctl restart NetworkManager
 # 安装本地 rpm 包
 
 ```bash
-rpm-ostree install -C --idempotent --apply-live *.rpm
+rpm-ostree install -C --idempotent --apply-live aa.rpm bb.rpm
 ```
 
 ![](imgs/Snipaste_2023-12-11_22-55-23.png)
 
-rpm 包可以在 CoreOS 上安装 `rpm-ostree install --apply-live yum-utils` 后使用 `yumdownloader --resolve xxx` 下载。
+rpm 包可以在 CoreOS 上安装 `rpm-ostree install --apply-live yum-utils` 后使用 `yumdownloader --resolve --alldeps xxx` 下载。
 
 已安装的包可以通过 `rpm-ostree override remove xxx` 卸载。
 
