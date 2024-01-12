@@ -1,3 +1,5 @@
+博文地址：https://github.com/wrype/blogs/tree/main/velero%20%E5%AE%9E%E9%AA%8C%E8%AE%B0%E5%BD%95
+
 <!-- TOC -->
 
 - [对象存储 minio 安装](#对象存储-minio-安装)
@@ -16,6 +18,7 @@
     - [备份文件比对](#备份文件比对)
     - [pv 文件恢复](#pv-文件恢复)
 - [参考资料](#参考资料)
+  - [镜像列表](#镜像列表)
 - [附录：restic 试用](#附录restic-试用)
   - [restic 客户端](#restic-客户端)
   - [文件恢复](#文件恢复)
@@ -426,6 +429,13 @@ velero 无法在已存在的 pv 上恢复数据，需要将工作负载删除后
 
 - 文件系统备份 FSB：https://velero.io/docs/v1.12/customize-installation/
 - kopia vs restic 官方测试结果：https://velero.io/docs/v1.10/performance-guidance/
+
+## 镜像列表
+
+- docker.io/bitnami/kubectl:1.27.1
+- docker.io/velero/velero:v1.12.2
+- docker.io/velero/velero-plugin-for-aws:v1.8.0
+- 提供 fsfreeze 工具：docker.io/library/ubuntu:bionic
 
 # 附录：restic 试用
 
