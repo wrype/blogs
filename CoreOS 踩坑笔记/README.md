@@ -71,9 +71,11 @@ rpm-ostree install -C --idempotent --apply-live aa.rpm bb.rpm
 
 ![](imgs/Snipaste_2023-12-11_22-55-23.png)
 
-rpm 包可以在 CoreOS 上安装 `rpm-ostree install --apply-live yum-utils` 后使用 `yumdownloader --resolve --alldeps xxx` 下载。
+rpm 包可以在 CoreOS 上安装 `rpm-ostree install --apply-live yum-utils` 后使用 `yumdownloader --resolve [--alldeps] xxx` 下载。
 
 已安装的包可以通过 `rpm-ostree override remove xxx` 卸载。
+
+`apply-live` 后需要找个空闲的时间重启机器，`apply-live` 会使 rpm-ostree 进入 `transient` 状态，没有真正的持久化，如果这时候系统掉电，现在安装的软件都会消失。
 
 ## selinux disable 后装不了包
 
@@ -102,3 +104,34 @@ growpart /dev/sda 4
 ```
 
 ![](imgs/Snipaste_2023-12-12_00-08-47.png)
+
+# 现有系统如何配置硬盘自动挂载
+
+> 参考 https://docs.fedoraproject.org/en-US/fedora-coreos/storage/
+
+系统上的硬盘都可以在 `/dev/disk/by-*` 下找到对应的映射
+
+![](./imgs/Snipaste_2024-01-12_16-53-02.png)
+
+CoreOS 上 `/etc/fstab` 是不可见的，配置自动挂载需要写一个 `/etc/systemd/system/var-localdata.mount` 文件，这里挂载 sdb1
+
+> 注意 mount 的文件名不能随便起，必须和挂载路径相对应，把“/”替换为“-”
+
+![](./imgs/Snipaste_2024-01-12_17-02-27.png)
+
+```ini
+[Unit]
+Description=Mount localdata directory
+
+[Mount]
+What=/dev/disk/by-uuid/5c5267f0-bc39-431e-9134-d0f494405f4c
+Where=/var/localdata
+Type=xfs
+
+[Install]
+RequiredBy=local-fs.target
+```
+
+`sudo systemctl enable var-localdata.mount`，重启后查看挂载情况
+
+![](./imgs/Snipaste_2024-01-12_18-37-23.png)
