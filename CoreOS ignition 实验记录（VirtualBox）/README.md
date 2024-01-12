@@ -1,25 +1,25 @@
-博文地址：https://github.com/wrype/blogs/tree/main/CoreOS%20%E5%AE%9E%E9%AA%8C%E8%AE%B0%E5%BD%95%EF%BC%88VirtualBox%EF%BC%89
+博文地址：https://github.com/wrype/blogs/tree/main/CoreOS%20ignition%20%E5%AE%9E%E9%AA%8C%E8%AE%B0%E5%BD%95%EF%BC%88VirtualBox%EF%BC%89
 
 <!-- TOC -->
 
 - [测试场景：CoreOS 初始化时安装软件](#%E6%B5%8B%E8%AF%95%E5%9C%BA%E6%99%AFcoreos-%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6)
-    - [实验准备](#%E5%AE%9E%E9%AA%8C%E5%87%86%E5%A4%87)
-        - [vscode 插件](#vscode-%E6%8F%92%E4%BB%B6)
-    - [VirtualBox 导入虚机](#virtualbox-%E5%AF%BC%E5%85%A5%E8%99%9A%E6%9C%BA)
-    - [生成 demo.ign，开启 Live Server](#%E7%94%9F%E6%88%90-demoign%E5%BC%80%E5%90%AF-live-server)
-    - [准备 butane pointer config](#%E5%87%86%E5%A4%87-butane-pointer-config)
-    - [设置 guestproperty，开机](#%E8%AE%BE%E7%BD%AE-guestproperty%E5%BC%80%E6%9C%BA)
-        - [开机后查看软件安装](#%E5%BC%80%E6%9C%BA%E5%90%8E%E6%9F%A5%E7%9C%8B%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85)
+  - [实验准备](#%E5%AE%9E%E9%AA%8C%E5%87%86%E5%A4%87)
+    - [vscode 插件](#vscode-%E6%8F%92%E4%BB%B6)
+  - [VirtualBox 导入虚机](#virtualbox-%E5%AF%BC%E5%85%A5%E8%99%9A%E6%9C%BA)
+  - [生成 demo.ign，开启 Live Server](#%E7%94%9F%E6%88%90-demoign%E5%BC%80%E5%90%AF-live-server)
+  - [准备 butane pointer config](#%E5%87%86%E5%A4%87-butane-pointer-config)
+  - [设置 guestproperty，开机](#%E8%AE%BE%E7%BD%AE-guestproperty%E5%BC%80%E6%9C%BA)
+    - [开机后查看软件安装](#%E5%BC%80%E6%9C%BA%E5%90%8E%E6%9F%A5%E7%9C%8B%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85)
 - [demo.bu butane 文件解析](#demobu-butane-%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90)
-    - [配置密码，上传公钥，启用密码登录](#%E9%85%8D%E7%BD%AE%E5%AF%86%E7%A0%81%E4%B8%8A%E4%BC%A0%E5%85%AC%E9%92%A5%E5%90%AF%E7%94%A8%E5%AF%86%E7%A0%81%E7%99%BB%E5%BD%95)
-        - [如何生成 password_hash](#%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90-password_hash)
-    - [设置时区](#%E8%AE%BE%E7%BD%AE%E6%97%B6%E5%8C%BA)
-    - [配置正向代理，用于访问 fedora 仓库](#%E9%85%8D%E7%BD%AE%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E7%94%A8%E4%BA%8E%E8%AE%BF%E9%97%AE-fedora-%E4%BB%93%E5%BA%93)
-    - [初始化系统时安装一些包](#%E5%88%9D%E5%A7%8B%E5%8C%96%E7%B3%BB%E7%BB%9F%E6%97%B6%E5%AE%89%E8%A3%85%E4%B8%80%E4%BA%9B%E5%8C%85)
-    - [禁用系统自动更新](#%E7%A6%81%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0)
-    - [设置主机名](#%E8%AE%BE%E7%BD%AE%E4%B8%BB%E6%9C%BA%E5%90%8D)
+  - [配置密码，上传公钥，启用密码登录](#%E9%85%8D%E7%BD%AE%E5%AF%86%E7%A0%81%E4%B8%8A%E4%BC%A0%E5%85%AC%E9%92%A5%E5%90%AF%E7%94%A8%E5%AF%86%E7%A0%81%E7%99%BB%E5%BD%95)
+    - [如何生成 password_hash](#%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90-password_hash)
+  - [设置时区](#%E8%AE%BE%E7%BD%AE%E6%97%B6%E5%8C%BA)
+  - [配置正向代理，用于访问 fedora 仓库](#%E9%85%8D%E7%BD%AE%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E7%94%A8%E4%BA%8E%E8%AE%BF%E9%97%AE-fedora-%E4%BB%93%E5%BA%93)
+  - [初始化系统时安装一些包](#%E5%88%9D%E5%A7%8B%E5%8C%96%E7%B3%BB%E7%BB%9F%E6%97%B6%E5%AE%89%E8%A3%85%E4%B8%80%E4%BA%9B%E5%8C%85)
+  - [禁用系统自动更新](#%E7%A6%81%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0)
+  - [设置主机名](#%E8%AE%BE%E7%BD%AE%E4%B8%BB%E6%9C%BA%E5%90%8D)
 - [镜像内嵌 ign 文件](#%E9%95%9C%E5%83%8F%E5%86%85%E5%B5%8C-ign-%E6%96%87%E4%BB%B6)
-    - [原理分析](#%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90)
+  - [原理分析](#%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90)
 - [参考](#%E5%8F%82%E8%80%83)
 
 <!-- /TOC -->
@@ -319,7 +319,7 @@ sudo guestfish -a fedora-coreos-embed-ign.qcow2
 
 ## 原理分析
 
-CoreOS上查看脚本 `cat /usr/lib/dracut/modules.d/35coreos-ignition/coreos-ignition-setup-user.sh`，
+CoreOS 上查看脚本 `cat /usr/lib/dracut/modules.d/35coreos-ignition/coreos-ignition-setup-user.sh`，
 会把 `/boot/ignition/config.ign` 复制到 `/usr/lib/ignition/user.ign`
 
 > 源码 https://github.com/coreos/fedora-coreos-config/blob/testing-devel/overlay.d/05core/usr/lib/dracut/modules.d/35coreos-ignition/coreos-ignition-setup-user.sh
