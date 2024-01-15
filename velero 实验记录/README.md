@@ -2,6 +2,7 @@
 
 <!-- TOC -->
 
+- [velero 简介](#velero-简介)
 - [对象存储 minio 安装](#对象存储-minio-安装)
 - [velero 环境准备](#velero-环境准备)
   - [创建 backup-location](#创建-backup-location)
@@ -17,6 +18,7 @@
   - [kopia](#kopia)
     - [备份文件比对](#备份文件比对)
     - [pv 文件恢复](#pv-文件恢复)
+- [集群迁移](#集群迁移)
 - [参考资料](#参考资料)
   - [镜像列表](#镜像列表)
 - [附录：restic 试用](#附录restic-试用)
@@ -24,6 +26,12 @@
   - [文件恢复](#文件恢复)
 
 <!-- /TOC -->
+
+# velero 简介
+
+velero 是 VMWare 开源的 k8s 集群备份、迁移工具。用于 Kubernetes 集群资源和持久存储卷（PV）的备份、迁移以及灾难恢复等。velero 的基本原理就是将集群的数据备份到对象存储中，在恢复的时候将数据从对象存储中拉取下来。
+
+相比于 etcd 只能针对整个集群进行备份、恢复，velero 可以在 Kubernetes 集群内按对象级别进行备份、恢复，同时 velero 支持多种后端对象存储，并且 velero 支持将当前集群数据全部或部分迁移到其他集群上。
 
 # 对象存储 minio 安装
 
@@ -425,10 +433,32 @@ velero 无法在已存在的 pv 上恢复数据，需要将工作负载删除后
 
 ![](./imgs/Snipaste_2024-01-12_22-13-30.png)
 
+# 集群迁移
+
+> 参考 https://velero.io/docs/main/migration-case/
+
+集群迁移的过程是在源集群做一个 backup，然后恢复到目标集群上；目标集群上需要部署 velero，并创建和源集群相同的 bsl（可以根据需要把目标集群上的 bsl 调整为只读模式）。
+
+> 整个迁移的过程都不会改动资源的 API Group 版本
+
+velero 默认只备份每个资源的首选 API Group 版本，备份所有的 API Group 版本需要开启 `EnableAPIGroupVersions` 特性；相对应的，目标集群开启 `EnableAPIGroupVersions` 特性后，会按照 API Group 版本优先级进行恢复。
+
+```yaml
+# velero 特性配置
+configuration:
+  features: EnableAPIGroupVersions
+```
+
+> EnableAPIGroupVersions 特性介绍参考
+> https://velero.io/docs/v1.12/enable-api-group-versions-feature/
+
+> 每个资源的首选 API Group 版本参考
+> https://velero.io/docs/main/output-file-format/#file-format-version-11-current
+
 # 参考资料
 
-- 文件系统备份 FSB：https://velero.io/docs/v1.12/customize-installation/
-- kopia vs restic 官方测试结果：https://velero.io/docs/v1.10/performance-guidance/
+- 文件系统备份 FSB：https://velero.io/docs/main/customize-installation/
+- kopia vs restic 官方测试结果：https://velero.io/docs/main/performance-guidance/
 
 ## 镜像列表
 
